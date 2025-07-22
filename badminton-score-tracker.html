@@ -6,6 +6,11 @@
     <title>Score Tracker</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Score Tracker">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <style>
         * {
             margin: 0;
@@ -1732,6 +1737,20 @@
             
             menu.classList.remove('open');
             overlay.classList.remove('show');
+        }
+
+        // Register service worker for PWA/offline support
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(function(registration) {
+                        // Registration successful
+                        // console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    }, function(err) {
+                        // Registration failed
+                        // console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
         }
 
         // Add Enter key support for saving settings
