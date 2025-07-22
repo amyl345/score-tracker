@@ -924,12 +924,13 @@
 
         <div class="vs-section">
             <div class="vs">VS</div>
+            <!-- removed new game button as it breaks the settings and info on use 
             <div class="game-controls">
                 <button class="game-btn" onclick="newGame()">
                     <span class="material-icons">refresh</span>
                     New Game
                 </button>
-            </div>
+            </div> -->
         </div>
 
         <div class="team" id="team2">
@@ -1361,24 +1362,21 @@
         }
 
         function newGame() {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.style.display = 'flex';
-            modal.innerHTML = `
+            const content = `
                 <div class="modal-content" style="text-align: center; max-width: 400px;">
                     <h3 style="margin-bottom: 20px; color: #2c3e50;">Start New Match?</h3>
                     <p style="margin-bottom: 30px; color: #6c757d;">This will reset all scores and sets.</p>
                     <div style="display: flex; gap: 15px; justify-content: flex-end;">
-                        <button class="game-btn" onclick="document.body.removeChild(document.querySelector('.modal'))" style="background: #6c757d; color: white; border-color: #6c757d;">
+                        <button class="game-btn" onclick="removeAllDynamicModals()" style="background: #6c757d; color: white; border-color: #6c757d;">
                             Cancel
                         </button>
-                        <button class="game-btn" onclick="confirmNewGame(); document.body.removeChild(document.querySelector('.modal'));" style="background: #007bff; color: white; border-color: #007bff;">
+                        <button class="game-btn" onclick="confirmNewGame();" style="background: #007bff; color: white; border-color: #007bff;">
                             Yes
                         </button>
                     </div>
                 </div>
             `;
-            document.body.appendChild(modal);
+            createModal(content);
         }
 
         function confirmNewGame() {
@@ -1399,6 +1397,8 @@
             closeModal('settingsModal');
             // Close mobile menu if open
             closeMobileMenu();
+            // Close the new game modal
+            removeAllDynamicModals();
         }
 
         function resetAll() {
