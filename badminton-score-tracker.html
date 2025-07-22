@@ -924,13 +924,13 @@
 
         <div class="vs-section">
             <div class="vs">VS</div>
-            <!-- removed new game button as it breaks the settings and info on use 
+            <!-- removed new game button as it breaks the settings and info on use -->
             <div class="game-controls">
                 <button class="game-btn" onclick="newGame()">
                     <span class="material-icons">refresh</span>
                     New Game
                 </button>
-            </div> -->
+            </div>
         </div>
 
         <div class="team" id="team2">
@@ -1286,7 +1286,7 @@
                 </div>
                 <div class="toast-buttons">
                     <button class="toast-btn primary" onclick="continueToNextSet(); removeToast(this.parentElement.parentElement);">Continue</button>
-                    <button class="toast-btn" onclick="newGame(); removeToast(this.parentElement.parentElement);">New Match</button>
+                    <button class="toast-btn" onclick="forceNewGame(); removeToast(this.parentElement.parentElement);">New Match</button>
                 </div>
             `;
             
@@ -1362,64 +1362,116 @@
         }
 
         function newGame() {
+            // Remove any existing modals first
+            removeAllDynamicModals();
+
             const content = `
                 <div class="modal-content" style="text-align: center; max-width: 400px;">
                     <h3 style="margin-bottom: 20px; color: #2c3e50;">Start New Match?</h3>
                     <p style="margin-bottom: 30px; color: #6c757d;">This will reset all scores and sets.</p>
                     <div style="display: flex; gap: 15px; justify-content: flex-end;">
-                        <button class="game-btn" onclick="removeAllDynamicModals()" style="background: #6c757d; color: white; border-color: #6c757d;">
+                        <button class="game-btn" id="cancelNewGameBtn" style="background: #6c757d; color: white; border-color: #6c757d;">
                             Cancel
                         </button>
-                        <button class="game-btn" onclick="confirmNewGame();" style="background: #007bff; color: white; border-color: #007bff;">
+                        <button class="game-btn" id="confirmNewGameBtn" style="background: #007bff; color: white; border-color: #007bff;">
                             Yes
                         </button>
                     </div>
                 </div>
             `;
-            createModal(content);
+            const modal = createModal(content);
+
+            // Attach event listeners to buttons
+            modal.querySelector('#cancelNewGameBtn').onclick = () => {
+                removeAllDynamicModals();
+            };
+            modal.querySelector('#confirmNewGameBtn').onclick = () => {
+                confirmNewGame();
+                removeAllDynamicModals();
+            };
         }
 
         function confirmNewGame() {
-            gameState = {
-                team1: { score: 0, sets: 0, games: 0, points: 0 },
-                team2: { score: 0, sets: 0, games: 0, points: 0 },
-                currentSet: 1,
-                gameHistory: gameState.gameHistory,
-                isDeuce: false,
-                advantage: null
-            };
+            // Reset all game state
+            gameState.team1.score = 0;
+            gameState.team2.score = 0;
+            gameState.team1.sets = 0;
+            gameState.team2.sets = 0;
+            gameState.team1.games = 0;
+            gameState.team2.games = 0;
+            gameState.team1.points = 0;
+            gameState.team2.points = 0;
+            gameState.currentSet = 1;
+            gameState.isDeuce = false;
+            gameState.advantage = null;
             pendingSetWin = false;
+
             updateDisplay();
             document.getElementById('winnerBanner').style.display = 'none';
+
             // Remove any notifications
             document.querySelectorAll('.set-notification').forEach(notification => removeNotification(notification));
             // Close settings modal if open
             closeModal('settingsModal');
             // Close mobile menu if open
             closeMobileMenu();
-            // Close the new game modal
-            removeAllDynamicModals();
+        }
+
+        function forceNewGame() {
+            // Reset all game state immediately (no popup)
+            gameState.team1.score = 0;
+            gameState.team2.score = 0;
+            gameState.team1.sets = 0;
+            gameState.team2.sets = 0;
+            gameState.team1.games = 0;
+            gameState.team2.games = 0;
+            gameState.team1.points = 0;
+            gameState.team2.points = 0;
+            gameState.currentSet = 1;
+            gameState.isDeuce = false;
+            gameState.advantage = null;
+            pendingSetWin = false;
+
+            updateDisplay();
+            document.getElementById('winnerBanner').style.display = 'none';
+
+            // Remove any notifications
+            document.querySelectorAll('.set-notification').forEach(notification => removeNotification(notification));
+            // Close settings modal if open
+            closeModal('settingsModal');
+            // Close mobile menu if open
+            closeMobileMenu();
         }
 
         function resetAll() {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.style.display = 'flex';
-            modal.innerHTML = `
+            // Remove any existing dynamic modals first
+            removeAllDynamicModals();
+
+            const content = `
                 <div class="modal-content" style="text-align: center; max-width: 400px;">
                     <h3 style="margin-bottom: 20px; color: #dc3545;">Reset Everything?</h3>
                     <p style="margin-bottom: 30px; color: #6c757d;">This will reset all scores, sets, and team names. This cannot be undone.</p>
                     <div style="display: flex; gap: 15px; justify-content: flex-end;">
-                        <button class="game-btn" onclick="document.body.removeChild(document.querySelector('.modal'))" style="background: #6c757d; color: white; border-color: #6c757d;">
+                        <button class="game-btn" id="cancelResetAllBtn" style="background: #6c757d; color: white; border-color: #6c757d;">
                             Cancel
                         </button>
-                        <button class="game-btn" onclick="confirmResetAll(); document.body.removeChild(document.querySelector('.modal'));" style="background: #dc3545; color: white; border-color: #dc3545;">
+                        <button class="game-btn" id="confirmResetAllBtn" style="background: #dc3545; color: white; border-color: #dc3545;">
                             Yes
                         </button>
                     </div>
                 </div>
             `;
-            document.body.appendChild(modal);
+            const modal = createModal(content);
+
+            modal.querySelector('#cancelResetAllBtn').onclick = () => {
+                removeAllDynamicModals();
+            };
+            modal.querySelector('#confirmResetAllBtn').onclick = () => {
+                confirmResetAll();
+                removeAllDynamicModals();
+                // Optionally, reopen the settings modal if it was open
+                document.getElementById('settingsModal').style.display = 'flex';
+            };
         }
 
         function confirmResetAll() {
@@ -1433,11 +1485,17 @@
             };
             settings.team1Name = 'Team A';
             settings.team2Name = 'Team B';
+            settings.scoringStyle = 'badminton21';
+            settings.pointsPerSet = 21;
+            settings.isTennis = false;
             pendingSetWin = false;
             updateDisplay();
             document.getElementById('winnerBanner').style.display = 'none';
             // Remove any notifications
             document.querySelectorAll('.set-notification').forEach(notification => removeNotification(notification));
+            // Save settings and history
+            localStorage.setItem('scoreTrackerSettings', JSON.stringify(settings));
+            saveGameHistory();
         }
 
         function showSettingsModal() {
